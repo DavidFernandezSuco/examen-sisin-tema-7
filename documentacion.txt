@@ -1,0 +1,186 @@
+vagrant up para crear la maquina virtual
+vagrant reload para encender la maquina virtual
+vagrant halt para apagar la maquina virtual
+vagrant box add + nombre del box para descargar el box
+ip a 
+vagrant init crear el vagrantfile
+vagrant reload para iniciar maquina virtual en la que se haya hecho cambios
+vagrant destroy para eliminar maquinas virtuales
+vagrant ssh para conectrse a la maquina virtual
+vagrant destroy para eliminar una maquina virtual
+
+git init 
+git add -A backup del proyecto desde el directorio en el que estoy y de sus hijos
+git add . directorio actual
+git add nombrearchivo para hacerlo de un archivo
+git commit -m
+git log --oneline para ver los commits que se hicieron
+
+para subir el repositorio a gir hub:
+git remote add origin git@github.com:DavidFernandezSuco/proyecto3-provision-manual.git
+git branch -M main
+git push -u origin main
+sudo apt update para obtener posibles actualizaciones
+sudo apt upgrade para actualizar
+sudo apt install nginx -y para instalar nginx
+sudo systemctl restart nginx para reiniciar
+
+ifconfig para mirar interfaces de red
+system ctl
+sudo systemctl status nginx ver el estado de un servicio que tengas instalado en un servidor
+sudo systemctl restart nginx para reiniciar nginx con los cambios que se hayan hecho
+sudo service nginx restar para reiniciar el servicio
+sudo nano /etc/nginx/sites-enabled/default para entrar al archivo y editar el archivo 
+vagrant provision para volver a ejecutar el vagrant file despues de ejecutar una maquina virtual con cambios
+vagrant box remove + nombre para borrar 
+cd . vagrant.d par verlo ls -la, esto para ver el listado de boxes
+vagrant box list para listar las boxes
+vagrant reload --provision
+-------------------------------------------------------------------------------------------------
+Compatibilidad no hay problema al usar xenial (que es ubuntu)
+Integridad: se verifica al hacer el sudo apt update
+Creacion de directorios requeridos se hace con el vagrant file
+Creacion de usuarios requeridos : sudo su, cambiarse al usuario root
+
+SIEMPRE hay que hacer un sudo apt update cuando nos conectemos a la mv mediante ssh
+sudo apt install mysql-server para instalar, poner contraseña y continuar
+sudo systemctl status mysql para ver el estado del servicio
+sudo systemctl start mysql para inciar el servicio
+sudo systemctl stop mysql para parar el servicio
+mysql -u root -p para acceder indican -u del usuario en este caso root y -p para meter la password
+a partir de aqui se usan los comandos de sql
+CREATE DATABASE gestion_empleados;
+SHOW tables para mostrar las tablas que hay en el esquema creado
+crear una tabla con sus campos:
+ CREATE TABLE empleados (
+    -> idEmpleado INT AUTO_INCREMENT PRIMARY KEY,
+    -> nombre VARCHAR(100) NOT NULL,
+    -> apellido VARCHAR(100) NOT NULL,
+    -> edad INT,
+    -> salario DECIMAL(10,2),
+    -> departamento VARCHAR(100));
+EXIT para salir de mysql
+SOURCE + nombre del archivo para importar archivo .sql directamente a la base de datos
+.gitignore para crear un archivo donde escribir la info que no se quiera subir a la nube, en este caso se es *.log para que no se suba el log
+ALTER DATABASE gestion_empleados CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; para poder cargar la info de la bbdd con ñ y demas 
+
+comando para elevar privilegios a superusuario
+sudo su
+primer comando que se debe ejecutar para actualizar los paquetes de una máquina virtual en Ubuntu
+sudo apt install mysql-server
+comando se utiliza para instalar el servidor MySQL en Ubuntu
+sudo apt install mysql-server
+ iniciar, verificar el estado y habilitar el servidor MySQL 
+sudo systemctl start mysql iniciar
+sudo systemctl status mysql verificar
+sudo systemctl enable mysql para habilitar
+
+
+
+comando se utiliza para acceder a MySQL como usuario root después de la instalación
+mysql -u root -p
+
+crea una base de datos 
+CREATE DATABASE nombre
+USE nombreBBDD para cambiar la base de datos
+comando SQL para crear la tabla
+CREATE TABLE libros(
+    -> idLibro INT AUTO_INCREMENT PRIMARY KEY,
+    -> titulo VARCHAR(200) NOT NULL,
+    -> autor VARCHAR(100) NOT NULL,
+    -> anio_publicacion INT,
+    -> genero VARCHAR(100),
+    -> precio DECIMAL(10,2));
+
+
+carga el archivo datos_libros.sql en MySQL desde la máquina virtual
+SOURCE /home/vagrant/datos_libros.sql
+
+salir de mysql con exit, despues pwd y ls para ver que el archivo existe y hacer un cat para ver que tiene los datos
+despues volver a mysql para hacer SOURCE datos_libros.sql
+
+Qué comando se utiliza para detener el servicio MySQL
+sudo systemctl stop mysql
+
+
+
+modificar a base de datos gestion_libreria para cambiar su juego de caracteres y colación a utf8mb4 y utf8mb4_unicode_ci? 
+ALTER DATABASE gestion_libreria CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-------------------------------------------------------------------------------------------------------------------------------
+VAGRANTFILE PRACTICA
+Vagrant.configure("2") do |config|
+  
+  # Introduce aquí la configuración del servidor virtual
+  config.vm.box = "ubuntu/xenial64"
+  config.vm.network "private_network", ip: "192.168.50.55"
+  config.vm.synced_folder ".", "/tarea7_david_fernandez_suco"
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "512"
+    vb.cpus = 1
+
+  config.vm.provision "shell", inline: <<-SHELL
+     # Instalación de los binarios de PHP, el driver mysqli y la extensión FPM para realizar peticiones de tipo RESTful
+     sudo apt-get update
+     sudo apt-get install -y php php-mysqli
+     sudo apt-get install -y php7.0-fpm
+
+    # Generar archivo SQL con los registros de los diferentes Módulos Profesionales
+    echo "-- Insertar datos en la tabla 'horario'" > /home/vagrant/horario.sql
+echo "INSERT INTO gestion_dam.horario(lunes, martes, miercoles, jueves, viernes) VALUES" >> /home/vagrant/horario.sql
+echo "('FOL', 'SISIN', 'BADAT', 'BADAT', 'SISIN')," >> /home/vagrant/horario.sql
+echo "('PROGR', 'LMSGI', 'BADAT', 'LEUP', 'BADAT')," >> /home/vagrant/horario.sql
+echo "('BADAT', 'LMSGI', 'PROGR', 'LEUP', 'ENDES')," >> /home/vagrant/horario.sql
+echo "('BADAT', 'ENDES', 'LMSGI', 'PROGR', 'ENDES')," >> /home/vagrant/horario.sql 
+echo "('SISIN', 'PROGR', 'LMSGI', 'PROGR', 'ENDES')," >> /home/vagrant/horario.sql
+echo "('SISIN', 'FOL', 'FOL', 'SISIN', 'PROGR');" >> /home/vagrant/horario.sql
+
+
+ 
+  SHELL
+ 
+ 
+end
+----------------------------------------------------------------------------------------------------------------------------------------------
+EJEMPLO index.html
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejemplo Web - Horario</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h1 class="mt-5">Práctica SISIN - Tema 7 - Horario 1º DAM</h1>
+
+        <table id="horarioTable" class="table table-bordered table-dark mt-3">
+            <thead>
+                <tr>
+                    <th scope="col">Lunes</th>
+                    <th scope="col">Martes</th>
+                    <th scope="col">Miércoles</th>
+                    <th scope="col">Jueves</th>
+                    <th scope="col">Viernes</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
